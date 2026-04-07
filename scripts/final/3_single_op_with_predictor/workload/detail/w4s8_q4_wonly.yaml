@@ -1,0 +1,8 @@
+precision:
+- - 4
+  - 8
+group:
+- - 32
+  - 32
+type:
+- w_only

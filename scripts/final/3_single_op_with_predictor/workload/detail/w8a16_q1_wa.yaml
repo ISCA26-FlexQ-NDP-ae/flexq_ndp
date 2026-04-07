@@ -1,0 +1,8 @@
+precision:
+- - 8
+  - 16
+group:
+- - 1
+  - 16
+type:
+- w_a
