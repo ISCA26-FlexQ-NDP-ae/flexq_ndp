@@ -1158,10 +1158,8 @@ def single_op_with_predictor_part1(**kwargs):
                 )
             else: 
                 predict_func = predict_w_only_func
-                continue
         else:
             predict_func = predict_w_a_func
-            continue
         for precision in precision_list:
             for quant_group in quant_group_list:
                 data_pre, scale_pre = precision
