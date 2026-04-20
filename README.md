@@ -155,6 +155,41 @@ bash ./scripts/final/9_mix_precision_pu/mix_pre_pu.sh
 python ./scripts/final/9_mix_precision_pu/extract_mix_precision_pu.py
 ```
 
+# NOTE: HPC / Slurm Compatibility
+
+By default, all `.sh` scripts use `nohup ... &` for background execution, which is designed for bare-metal servers. On HPC clusters with job schedulers like **Slurm**, the script exits immediately after launching background processes, causing Slurm to terminate the job allocation and kill all subprocesses.
+
+We provide Slurm-compatible variants for all simulation scripts, named `*_slurm.sh`. On Slurm, replace every `.sh` with the corresponding `*_slurm.sh`. For example:
+
+```bash
+# Bare-metal
+bash ./scripts/final/3_single_op_with_predictor/part_1.sh
+# Slurm
+bash ./scripts/final/3_single_op_with_predictor/part_1_slurm.sh
+```
+
+Two types of changes were made in the `*_slurm.sh` variants:
+
+1. **Sequential-chain scripts** (`part_1`, `cnn`, `ablation`, `buffer_change`, `throughput_change`, `mix_pre_pu`): replaced `nohup bash -c "$cmd" &` with `bash -c "$cmd"` — the script runs the command chain in the foreground and blocks until it completes.
+
+2. **Parallel-launch scripts** (`part2_m*`, `bash_energy`, `mm_speedup_optimal`, `quant_lat`, `process_workload`, `process_workload_all`): added `wait` at the end — the script blocks until all parallel background processes finish. **The parallelism among launched processes is fully preserved.**
+
+Python scripts (`extract_*.py`, `calculate_*.py`) are unaffected and do not need `_slurm` variants.
+
+## 34B MM4 Memory Warning (Part 2)
+
+The two configurations `34B_MM4_4096_20480_6656_w4s8_q1_wonly` and `34B_MM4_4096_20480_6656_w4s8_q2_wonly` (in `part2_m4096.sh`) require significantly more memory and runtime (~1.5h each) than other Part 2 tasks. Running them concurrently with other Part 2 scripts may cause OOM errors in memory-constrained environments. In that case, comment out these two lines in `part2_m4096_slurm.sh` and run them serially afterward:
+
+```bash
+log_dir="$FLEXQ_NDP_DIR/scripts/final/3_single_op_with_predictor/log_rebuttal_mm_new"
+python -OO ./aim_rebuttal.py -t single_op_with_predictor_part2 --num-processes 1 --total_buffer_size 20 \
+    --qconfig ./scripts/final/3_single_op_with_predictor/workload/detail/w4s8_q1_wonly.yaml \
+    -m 4096 -k 20480 -n 6656 > $log_dir/34B_MM4_4096_20480_6656_w4s8_q1_wonly.log 2>&1
+python -OO ./aim_rebuttal.py -t single_op_with_predictor_part2 --num-processes 1 --total_buffer_size 20 \
+    --qconfig ./scripts/final/3_single_op_with_predictor/workload/detail/w4s8_q2_wonly.yaml \
+    -m 4096 -k 20480 -n 6656 > $log_dir/34B_MM4_4096_20480_6656_w4s8_q2_wonly.log 2>&1
+```
+
 # NOTE: How to monitor and terminate background commands
 
 To monitor the issued compile commands, you can use commands like, the `[KEYWORD]` should be replaced to words contained in the background commands. For example, `aim`, `test_quant_latency`, `for_quant`.
