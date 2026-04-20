@@ -1,9 +1,11 @@
+> Built upon opensource [UniNDP](https://github.com/thu-nics/UniNDP) framework.
+
 # Setup
 
 Clone the repo and install dependencies.
 
 ```bash
-git clone
+git clone git@github.com:ISCA26-FlexQ-NDP-ae/flexq_ndp.git
 cd flexq_ndp
 pip install -r requirements.txt
 ```
