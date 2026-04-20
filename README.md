@@ -84,6 +84,9 @@ python ./scripts/final/8_energy/extract_energy.py
 ## A.3 Comparison between quantization precisions and QConfigs (Figure 9) (< 1 minute)
 
 ```bash
+# 1. Extract all single op data (Ensure that you have finished #A.1)
+python ./scripts/final/3_single_op_with_predictor/extract_all.py
+# 2. Extract data for Fig.9 to ./scripts/final/3_single_op_with_predictor/fig9
 python ./scripts/final/3_single_op_with_predictor/extract_fig9.py
 ```
 Results in `./scripts/final/3_single_op_with_predictor/fig9`.
